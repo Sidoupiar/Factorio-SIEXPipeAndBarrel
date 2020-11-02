@@ -1,34 +1,45 @@
-local size = SIStartup.siex_barrel.barrel_size()
-local time = SIStartup.siex_barrel.barrel_time()
-local need = SIStartup.siex_barrel.barrel_need()
+-- ------------------------------------------------------------------------------------------------
+-- -------- 创建装桶配方 --------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+
+local emptyBarrel = SIPackers.SingleItemProduct( "empty-barrel" , 1 , nil , nil , 1 )
+local minTemperature = 15
+local maxTemperature = 15
+
+local size = SIStartup.SIEXPB.barrel_size()
+local time = SIStartup.SIEXPB.barrel_time()
+local need = SIStartup.SIEXPB.barrel_need()
 if size ~= 50 or time ~= 0.2 or not need then
 	if size < 1 then size = 1 end
-	local list = {}
-	local name = {}
-	local iorder = 0
-	local forder = 0
-	local eorder = 0
-	local eb
-	local vscale
-	local item
-	local fill
-	local empt
-	local fl
-	local sc
-	local tc
-	local n
-	local barrel
-	if need then eb = { type = "item" , name = "empty-barrel" , amount = 1 , catalyst_amount = 1 } end
-	for k , v in pairs( SICF.list( SIType.fluid ) ) do
-		vscale = 16.0 / v.icon_size
-		item = SICF.data( SIType.item.item , k.."-barrel" )
-		fill = SICF.data( SIType.recipe , "fill-"..k.."-barrel" )
-		empt = SICF.data( SIType.recipe , "empty-"..k.."-barrel" )
-		fl = { type = "fluid" , name = k , amount = size , catalyst_amount = size }
-		sc = table.deepcopy( v.base_color )
-		tc = table.deepcopy( v.flow_color )
-		sc.a = 0.75
-		tc.a = 0.75
+	local recipes = {}
+	SIGen.Init( SIEXPB ).NewGroup( "extensions" )
+	for name , fluid in pairs( SIGen.GetList( SITypes.fluid ) ) do
+		local vscale = 16 / fluid.icon_size
+		local item = SIGen.GetData( SITypes.item.item , name.."-barrel" )
+		local baseColor = table.deepcopy( fluid.base_color )
+		local flowColor = table.deepcopy( fluid.flow_color )
+		baseColor.a = 0.75
+		flowColor.a = 0.75
+		if item then
+			local barrelName = SIGen.NewSubGroup( "siexpb-barrel" )
+			.NewItem( "barrel-"..name , item.stack-size )
+			.SetIcon( SIEXPB.picturePath.."item/barrel.png" )
+			.AddIcon( SIEXPB.picturePath.."item/barrel-side.png" , baseColor )
+			.AddIcon( SIEXPB.picturePath.."item/barrel-top.png" , flowColor )
+			.GetCurrentEntityName()
+			local fillBarrel = SIGen.GetData( SITypes.recipe , "fill-"..name.."-barrel" )
+			local fluidIngredient = SIPackers.SingleFluidIngredient( name , size , minTemperature , maxTemperature )
+			if fillBarrel then
+				
+			end
+			local emptyBarrel = SIGen.GetData( SITypes.recipe , "empty-"..name.."-barrel" )
+			local fluidProduct = SIPackers.SingleFluidProduct( name , size , nil , nil , minTemperature , size )
+			if emptyBarrel then
+				
+			end
+		end
+	end
+	for name , fluid in pairs( SIGen.GetList( SITypes.fluid ) ) do
 		if item then
 			iorder = iorder + 1
 			n = SIEX_BARREL.realname .. "barrel-" .. k
@@ -132,15 +143,23 @@ if size ~= 50 or time ~= 0.2 or not need then
 	SICF.extend{ tech }
 end
 
-local psize = SIStartup.siex_barrel.pipe_size()
+-- ------------------------------------------------------------------------------------------------
+-- -------- 调整管道容量 --------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+
+local psize = SIStartup.SIEXPB.pipe_size()
 psize = psize / 100
 if psize ~= 1 then
-	for k , v in pairs( data.raw.pipe ) do v.fluid_box.base_area = psize end
-	for k , v in pairs( data.raw["pipe-to-ground"] ) do v.fluid_box.base_area = psize end
+	for k , v in pairs( SIGen.GetList( SITypes.entity.pipe ) ) do v.fluid_box.base_area = psize end
+	for k , v in pairs( SIGen.GetList( SITypes.entity.pipeGround ) ) do v.fluid_box.base_area = psize end
 end
 
-local speed = SIStartup.siex_barrel.pump_speed()
+-- ------------------------------------------------------------------------------------------------
+-- ------- 调整管道泵速度 -------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+
+local speed = SIStartup.SIEXPB.pump_speed()
 speed = speed / 60
 if speed ~= 200 then
-	for k , v in pairs( data.raw.pump ) do v.pumping_speed = speed end
+	for k , v in pairs( SIGen.GetList( SITypes.entity.pump ) ) do v.pumping_speed = speed end
 end
