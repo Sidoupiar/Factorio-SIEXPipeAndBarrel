@@ -1,0 +1,10 @@
+{
+	"name" : "SIEXPipeAndBarrel" ,
+	"version" : "0.0.1" ,
+	"factorio_version" : "1.0" ,
+	"title" : "SI EX Pipe And Barrel" ,
+	"author" : "Sidoupiar" ,
+	"homepage" : "http://www.sidoupiar.com" ,
+	"description" : "自定义管道、泵和装桶配方" ,
+	"dependencies" : [ "SICoreFunctionLibrary >= 0.2.5" ]
+}
