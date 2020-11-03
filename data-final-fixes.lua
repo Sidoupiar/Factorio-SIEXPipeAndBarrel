@@ -2,7 +2,6 @@
 -- -------- 创建装桶配方 --------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 
-local emptyBarrel = SIPackers.SingleItemProduct( "empty-barrel" , 1 , nil , nil , 1 )
 local minTemperature = 15
 local maxTemperature = 15
 
@@ -15,132 +14,63 @@ if size ~= 50 or time ~= 0.2 or not need then
 	SIGen.Init( SIEXPB ).NewGroup( "extensions" )
 	for name , fluid in pairs( SIGen.GetList( SITypes.fluid ) ) do
 		local vscale = 16 / fluid.icon_size
-		local item = SIGen.GetData( SITypes.item.item , name.."-barrel" )
 		local baseColor = table.deepcopy( fluid.base_color )
 		local flowColor = table.deepcopy( fluid.flow_color )
 		baseColor.a = 0.75
 		flowColor.a = 0.75
+		local item = SIGen.GetData( SITypes.item.item , name.."-barrel" )
 		if item then
 			local barrelName = SIGen.NewSubGroup( "siexpb-barrel" )
-			.NewItem( "barrel-"..name , item.stack-size )
-			.SetIcon( SIEXPB.picturePath.."item/barrel.png" )
-			.AddIcon( SIEXPB.picturePath.."item/barrel-side.png" , baseColor )
-			.AddIcon( SIEXPB.picturePath.."item/barrel-top.png" , flowColor )
+			.NewItem( "barrel-"..name , item.stack_size )
+			.Inserter.Clear()
+			.Inserter.ClearIcon()
+			.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."item/barrel.png" )
+			.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."item/barrel-side.png" , baseColor )
+			.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."item/barrel-top.png" , flowColor )
 			.GetCurrentEntityName()
-			local fillBarrel = SIGen.GetData( SITypes.recipe , "fill-"..name.."-barrel" )
-			local fluidIngredient = SIPackers.SingleFluidIngredient( name , size , minTemperature , maxTemperature )
-			if fillBarrel then
-				
+			if SIGen.GetData( SITypes.recipe , "fill-"..name.."-barrel" ) then
+				local ingredients = { SIPackers.SingleFluidIngredient( name , size , minTemperature , maxTemperature ) }
+				if need then table.insert( ingredients , SIPackers.SingleItemIngredient( "empty-barrel" , 1 ) ) end
+				table.insert( recipes , SIGen.NewSubGroup( "siexpb-barrel-fill" )
+				.NewRecipe( "fill-"..barrelName )
+				.Inserter.Clear()
+				.Inserter.ClearIcon()
+				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-fill.png" )
+				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-fill-side.png" , baseColor )
+				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-fill-top.png" , flowColor )
+				.Inserter.InsertIconFromData( 0 , fluid , vscale , { 4 , -8 } )
+				.SetEnergy( time )
+				.AddCosts( ingredients )
+				.AddResults( SIPackers.SingleItemProduct( barrelName , 1 , nil , nil , 1 ) )
+				.GetCurrentEntityName() )
 			end
-			local emptyBarrel = SIGen.GetData( SITypes.recipe , "empty-"..name.."-barrel" )
-			local fluidProduct = SIPackers.SingleFluidProduct( name , size , nil , nil , minTemperature , size )
-			if emptyBarrel then
-				
+			if SIGen.GetData( SITypes.recipe , "empty-"..name.."-barrel" ) then
+				local products = { SIPackers.SingleFluidProduct( name , size , nil , nil , minTemperature , size ) }
+				if need then table.insert( products , SIPackers.SingleItemProduct( "empty-barrel" , 1 , nil , nil , 1 ) ) end
+				table.insert( recipes , SIGen.NewSubGroup( "siexpb-barrel-empty" )
+				.NewRecipe( "empty-"..barrelName )
+				.Inserter.Clear()
+				.Inserter.ClearIcon()
+				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-empty.png" )
+				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-empty-side.png" , baseColor )
+				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-empty-top.png" , flowColor )
+				.Inserter.InsertIconFromData( 0 , fluid , vscale , { 7 , 8 } )
+				.SetEnergy( time )
+				.AddCosts( barrelName )
+				.AddResults( products )
+				.GetCurrentEntityName() )
 			end
 		end
 	end
-	for name , fluid in pairs( SIGen.GetList( SITypes.fluid ) ) do
-		if item then
-			iorder = iorder + 1
-			n = SIEX_BARREL.realname .. "barrel-" .. k
-			barrel = { { type = "item" , name = n , amount = 1 , catalyst_amount = 1 } }
-			item = table.deepcopy( item )
-			item.name = n
-			item.icon = nil
-			item.icons =
-			{
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-barrel.png" ) ,
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-barrel-side.png" , sc ) ,
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-barrel-top.png" , tc )
-			}
-			item.subgroup = "sicfl-group-extensions-barrel-item"
-			item.order = iorder
-			table.insert( list , item )
-		end
-		if fill then
-			forder = forder + 1
-			n = SIEX_BARREL.realname .. "fill-" .. k
-			fill = table.deepcopy( fill )
-			fill.name = n
-			fill.icon = nil
-			fill.icons =
-			{
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-fill.png" ) ,
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-fill-side.png" , sc ) ,
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-fill-top.png" , tc )
-			}
-			if v.icon then table.insert( fill.icons , SICF.gen.iconitem( v.icon , nil , vscale , { 4 , -8 } , v.icon_size , v.icon_mipmaps ) )
-			elseif v.icons then
-				for n , m in pairs( v.icons ) do
-					local shift = { 4 , -8 }
-					local scale = vscale
-					if m.shift then
-						shift[1] = shift[1] + m.shift[1] * scale
-						shift[2] = shift[2] + m.shift[2] * scale
-					end
-					if m.scale then scale = scale * m.scale end
-					table.insert( fill.icons , SICF.gen.iconitem( m.icon , m.tint , scale , shift , m.icon_size , m.icon_mipmaps ) )
-				end
-			end
-			fill.energy_required = time
-			fill.always_show_products = true
-			fill.ingredients = {}
-			table.insert( fill.ingredients , fl )
-			if need then table.insert( fill.ingredients , eb ) end
-			fill.result = nil
-			fill.results = barrel
-			fill.subgroup = "sicfl-group-extensions-barrel-fill"
-			fill.order = forder
-			table.insert( list , fill )
-			table.insert( name , n )
-		end
-		if empt then
-			eorder = eorder + 1
-			n = SIEX_BARREL.realname .. "empty-" .. k
-			empt = table.deepcopy( empt )
-			empt.name = n
-			empt.icon = nil
-			empt.icons =
-			{
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-empt.png" ) ,
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-empt-side.png" , sc ) ,
-				SICF.gen.iconitem( SIEX_BARREL.pp.."items/item-empt-top.png" , tc )
-			}
-			if v.icon then table.insert( empt.icons , SICF.gen.iconitem( v.icon , nil , vscale , { 7 , 8 } , v.icon_size , v.icon_mipmaps ) )
-			elseif v.icons then
-				for n , m in pairs( v.icons ) do
-					local shift = { 7 , 8 }
-					local scale = vscale
-					if m.shift then
-						shift[1] = shift[1] + m.shift[1] * scale
-						shift[2] = shift[2] + m.shift[2] * scale
-					end
-					if m.scale then scale = scale * m.scale end
-					table.insert( empt.icons , SICF.gen.iconitem( m.icon , m.tint , scale , shift , m.icon_size , m.icon_mipmaps ) )
-				end
-			end
-			empt.energy_required = time
-			empt.always_show_products = true
-			empt.ingredients = barrel
-			empt.result = nil
-			empt.results = {}
-			table.insert( empt.results , fl )
-			if need then table.insert( empt.results , eb ) end
-			empt.subgroup = "sicfl-group-extensions-barrel-empt"
-			empt.order = eorder
-			table.insert( list , empt )
-			table.insert( name , n )
-		end
+	if #recipes > 0 then
+		local handling = SIGen.GetData( SITypes.technology , "fluid-handling" )
+		local unit = handling.unit
+		unit.count = unit.count * 2
+		SIGen.NewTechnology( "fluid-handling" )
+		.AddTechnologies( "fluid-handling" )
+		.AddCosts( unit )
+		.AddResult( SIPackers.RecipeModifiers( recipes ) )
 	end
-	if #list > 0 then SICF.extend( list ) end
-	local tech = table.deepcopy( SICF.data( SIType.tech , "fluid-handling" ) )
-	tech.name = SIEX_BARREL.realname .. "fluid-handling"
-	tech.icon = SIEX_BARREL.pp .. "techs/tech-fluid-handling.png"
-	tech.prerequisites = { "fluid-handling" }
-	tech.effects = SICF.gen.tech_recipes( name )
-	tech.unit.count = tech.unit.count * 2
-	tech.order = SIEX_BARREL.order_name .. "[fluid-handling]"
-	SICF.extend{ tech }
 end
 
 -- ------------------------------------------------------------------------------------------------
