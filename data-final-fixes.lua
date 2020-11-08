@@ -2,9 +2,6 @@
 -- -------- 创建装桶配方 --------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 
-local minTemperature = 15
-local maxTemperature = 15
-
 local size = SIStartup.SIEXPB.barrel_size()
 local time = SIStartup.SIEXPB.barrel_time()
 local need = SIStartup.SIEXPB.barrel_need()
@@ -29,7 +26,7 @@ if size ~= 50 or time ~= 0.2 or not need then
 			.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."item/barrel-top.png" , flowColor )
 			.GetCurrentEntityName()
 			if SIGen.GetData( SITypes.recipe , "fill-"..name.."-barrel" ) then
-				local ingredients = { SIPackers.SingleFluidIngredient( name , size , minTemperature , maxTemperature ) }
+				local ingredients = { SIPackers.SingleFluidIngredient( name , size ) }
 				if need then table.insert( ingredients , SIPackers.SingleItemIngredient( "empty-barrel" , 1 ) ) end
 				table.insert( recipes , SIGen.NewSubGroup( "siexpb-barrel-fill" )
 				.NewRecipe( "fill-"..barrelName )
@@ -40,12 +37,13 @@ if size ~= 50 or time ~= 0.2 or not need then
 				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-fill-top.png" , flowColor )
 				.Inserter.InsertIconFromData( 0 , fluid , vscale , { 4 , -8 } )
 				.SetEnergy( time )
-				.AddCosts( ingredients )
-				.AddResults( SIPackers.SingleItemProduct( barrelName , 1 , nil , nil , 1 ) )
+				.SetRecipeTypes( "crafting-with-fluid" )
+				.SetCosts( ingredients )
+				.SetResults{ SIPackers.SingleItemProduct( barrelName , 1 , nil , nil , 1 ) }
 				.GetCurrentEntityName() )
 			end
 			if SIGen.GetData( SITypes.recipe , "empty-"..name.."-barrel" ) then
-				local products = { SIPackers.SingleFluidProduct( name , size , nil , nil , minTemperature , size ) }
+				local products = { SIPackers.SingleFluidProduct( name , size , nil , nil , nil , size ) }
 				if need then table.insert( products , SIPackers.SingleItemProduct( "empty-barrel" , 1 , nil , nil , 1 ) ) end
 				table.insert( recipes , SIGen.NewSubGroup( "siexpb-barrel-empty" )
 				.NewRecipe( "empty-"..barrelName )
@@ -56,8 +54,9 @@ if size ~= 50 or time ~= 0.2 or not need then
 				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-empty-top.png" , flowColor )
 				.Inserter.InsertIconFromData( 0 , fluid , vscale , { 7 , 8 } )
 				.SetEnergy( time )
-				.AddCosts( barrelName )
-				.AddResults( products )
+				.SetRecipeTypes( "crafting-with-fluid" )
+				.SetCosts( barrelName )
+				.SetResults( products )
 				.GetCurrentEntityName() )
 			end
 		end
@@ -68,8 +67,8 @@ if size ~= 50 or time ~= 0.2 or not need then
 		unit.count = unit.count * 2
 		SIGen.NewTechnology( "fluid-handling" )
 		.AddTechnologies( "fluid-handling" )
-		.AddCosts( unit )
-		.AddResult( SIPackers.RecipeModifiers( recipes ) )
+		.SetCosts( unit )
+		.AddResults( SIPackers.RecipeModifiers( recipes ) )
 	end
 end
 
