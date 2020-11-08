@@ -2,10 +2,12 @@
 -- -------- 创建装桶配方 --------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 
+local stackSize = SIStartup.SIEXPB.barrel_stack_size()
 local size = SIStartup.SIEXPB.barrel_size()
 local time = SIStartup.SIEXPB.barrel_time()
 local need = SIStartup.SIEXPB.barrel_need()
 if size ~= 50 or time ~= 0.2 or not need then
+	if stackSize < 1 then stackSize = 1 end
 	if size < 1 then size = 1 end
 	local recipes = {}
 	SIGen.Init( SIEXPB ).NewGroup( "extensions" )
@@ -15,10 +17,11 @@ if size ~= 50 or time ~= 0.2 or not need then
 		local flowColor = table.deepcopy( fluid.flow_color )
 		baseColor.a = 0.75
 		flowColor.a = 0.75
-		local item = SIGen.GetData( SITypes.item.item , name.."-barrel" )
-		if item then
+		local fluidName = fluid.localised_name and fluid.localised_name or { fluid.type.."-name."..fluid.name }
+		if SIGen.GetData( SITypes.item.item , name.."-barrel" ) then
 			local barrelName = SIGen.NewSubGroup( "siexpb-barrel" )
-			.NewItem( "barrel-"..name , item.stack_size )
+			.NewItem( "barrel-"..name , stackSize )
+			.SetLocalizedNames{ "SIEXPB.barrel" , fluidName }
 			.Inserter.Clear()
 			.Inserter.ClearIcons()
 			.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."item/barrel.png" )
@@ -30,6 +33,7 @@ if size ~= 50 or time ~= 0.2 or not need then
 				if need then table.insert( ingredients , SIPackers.SingleItemIngredient( "empty-barrel" , 1 ) ) end
 				table.insert( recipes , SIGen.NewSubGroup( "siexpb-barrel-fill" )
 				.NewRecipe( "fill-"..barrelName )
+				.SetLocalizedNames{ "SIEXPB.fill" , fluidName }
 				.Inserter.Clear()
 				.Inserter.ClearIcons()
 				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-fill.png" )
@@ -47,6 +51,7 @@ if size ~= 50 or time ~= 0.2 or not need then
 				if need then table.insert( products , SIPackers.SingleItemProduct( "empty-barrel" , 1 , nil , nil , 1 ) ) end
 				table.insert( recipes , SIGen.NewSubGroup( "siexpb-barrel-empty" )
 				.NewRecipe( "empty-"..barrelName )
+				.SetLocalizedNames{ "SIEXPB.empty" , fluidName }
 				.Inserter.Clear()
 				.Inserter.ClearIcons()
 				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-empty.png" )
@@ -61,6 +66,7 @@ if size ~= 50 or time ~= 0.2 or not need then
 			end
 		end
 	end
+	SIGen.FinishData().Inserter.Clear()
 	if #recipes > 0 then
 		local handling = SIGen.GetData( SITypes.technology , "fluid-handling" )
 		local unit = handling.unit
@@ -68,8 +74,9 @@ if size ~= 50 or time ~= 0.2 or not need then
 		SIGen.NewTechnology( "fluid-handling" )
 		.AddTechnologies( "fluid-handling" )
 		.SetCosts( unit )
-		.AddResults( SIPackers.RecipeModifiers( recipes ) )
+		.SetResults( SIPackers.RecipeModifiers( recipes ) )
 	end
+	SIGen.Finish()
 end
 
 -- ------------------------------------------------------------------------------------------------
