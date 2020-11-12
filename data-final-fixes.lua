@@ -21,7 +21,7 @@ if size ~= 50 or time ~= 0.2 or not need then
 		if SIGen.GetData( SITypes.item.item , name.."-barrel" ) then
 			local barrelName = SIGen.NewSubGroup( "siexpb-barrel" )
 			.NewItem( "barrel-"..name , stackSize )
-			.SetLocalizedNames{ "SIEXPB.barrel" , fluidName }
+			.SetLocalisedNames{ "SIEXPB.barrel" , fluidName }
 			.Inserter.Clear()
 			.Inserter.ClearIcons()
 			.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."item/barrel.png" )
@@ -33,7 +33,7 @@ if size ~= 50 or time ~= 0.2 or not need then
 				if need then table.insert( ingredients , SIPackers.SingleItemIngredient( "empty-barrel" , 1 ) ) end
 				table.insert( recipes , SIGen.NewSubGroup( "siexpb-barrel-fill" )
 				.NewRecipe( "fill-"..barrelName )
-				.SetLocalizedNames{ "SIEXPB.fill" , fluidName }
+				.SetLocalisedNames{ "SIEXPB.fill" , fluidName }
 				.Inserter.Clear()
 				.Inserter.ClearIcons()
 				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-fill.png" )
@@ -51,7 +51,7 @@ if size ~= 50 or time ~= 0.2 or not need then
 				if need then table.insert( products , SIPackers.SingleItemProduct( "empty-barrel" , 1 , nil , nil , 1 ) ) end
 				table.insert( recipes , SIGen.NewSubGroup( "siexpb-barrel-empty" )
 				.NewRecipe( "empty-"..barrelName )
-				.SetLocalizedNames{ "SIEXPB.empty" , fluidName }
+				.SetLocalisedNames{ "SIEXPB.empty" , fluidName }
 				.Inserter.Clear()
 				.Inserter.ClearIcons()
 				.Inserter.InsertIcon( 0 , SIEXPB.picturePath.."recipe/barrel-empty.png" )
