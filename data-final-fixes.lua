@@ -12,7 +12,7 @@ if size ~= 50 or time ~= 0.2 or not need then
 	local recipes = {}
 	SIGen.Init( SIEXPB ).NewGroup( "extensions" )
 	for name , fluid in pairs( SIGen.GetList( SITypes.fluid ) ) do
-		local vscale = 16 / fluid.icon_size
+		local vscale = 16 / ( fluid.icon_size or SINumbers.iconSize )
 		local baseColor = table.deepcopy( fluid.base_color )
 		local flowColor = table.deepcopy( fluid.flow_color )
 		baseColor.a = 0.75
